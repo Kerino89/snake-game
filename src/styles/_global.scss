@@ -1,0 +1,20 @@
+:root {
+  --color: rgb(216, 216, 216);
+  --background-color: rgb(44, 44, 44);
+  --background-color-canvas: rgb(99, 99, 99);
+}
+
+body {
+  display: flex;
+  flex-flow: column nowrap;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  margin: 0;
+  color: var(--color);
+  font-family: "Open Sans", sans-serif;
+  background-color: var(--background-color);
+}
+
+main {
+}
