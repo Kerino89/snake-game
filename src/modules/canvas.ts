@@ -1,4 +1,3 @@
-import { clamp } from "../helpers/clamp";
 import { isString } from "../helpers/types-guard";
 
 import type { CanvasOptions } from "../interfaces/canvas-options";
