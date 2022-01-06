@@ -15,7 +15,7 @@
   "author": "kerino89@gmail.com",
   "license": "MIT",
   "devDependencies": {
-    "@parcel/transformer-sass": "^2.0.1",
-    "parcel": "^2.0.1"
+    "@parcel/transformer-sass": "^2.1.0",
+    "parcel": "^2.1.0"
   }
 }
