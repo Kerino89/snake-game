@@ -3,8 +3,8 @@ import { isString } from "../helpers/types-guard";
 import type { CanvasOptions } from "../interfaces/canvas-options";
 
 const DEFAULT_CANVAS_OPTIONS: CanvasOptions = {
-  minWidth: 600,
-  minHeight: 450,
+  width: 600,
+  height: 600,
 };
 
 export class Canvas {
@@ -31,18 +31,31 @@ export class Canvas {
     }
 
     this._options = { ...DEFAULT_CANVAS_OPTIONS, ...options };
-    this.updateSizeCanvas();
+    this.updateSize();
   }
 
-  private updateSizeCanvas(): void {
-    const { minHeight, minWidth } = this._options;
+  public get width(): number {
+    return this.element.width;
+  }
+
+  public get height(): number {
+    return this.element.height;
+  }
+
+  private updateSize(): void {
+    const { width, height } = this._options;
     const attrs = new Map([
-      ["width", minWidth],
-      ["height", minHeight],
+      ["width", width],
+      ["height", height],
     ]);
 
     attrs.forEach((value, attr) => {
       this.element.setAttribute(attr, String(value));
     });
+  }
+
+  public setSize(size: Pick<CanvasOptions, "width" | "height">): void {
+    this._options = { ...this._options, ...size };
+    this.updateSize();
   }
 }
