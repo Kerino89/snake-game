@@ -1,4 +1,4 @@
 export interface CanvasOptions {
-  minWidth: number;
-  minHeight: number;
+  width: number;
+  height: number;
 }
