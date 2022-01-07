@@ -20,7 +20,7 @@ export class Animate {
   }
 
   public start = (
-    draw: (progress: number) => void,
+    animate: (progress: number) => void,
     options?: Partial<AnimateOptions>
   ) => {
     const { duration, timing, loop } = { ...this._options, ...options };
@@ -30,12 +30,12 @@ export class Animate {
       const timeFraction = clamp(0, (time - start) / duration, 1);
       const progress = timing(timeFraction);
 
-      draw(progress);
+      animate(progress);
 
       if (timeFraction < 1) {
         this._animationID = requestAnimationFrame(callback);
       } else if (loop) {
-        this.start(draw, options);
+        this.start(animate, options);
       }
     };
 
