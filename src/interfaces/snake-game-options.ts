@@ -1,1 +1,4 @@
-export interface SnakeGameOptions {}
+export interface SnakeGameOptions {
+  startTails: number;
+  sizeCell: number;
+}
