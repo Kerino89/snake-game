@@ -34,7 +34,7 @@ export class Animate {
 
       if (timeFraction < 1) {
         this._animationID = requestAnimationFrame(callback);
-      } else if (loop) {
+      } else if (loop && !isUndefined(this._animationID)) {
         this.start(animate, options);
       }
     };

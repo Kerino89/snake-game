@@ -1,16 +1,21 @@
+import { randomInt } from "./helpers/random-int";
+
 import { SnakeGameEvent } from "./constants/snake-game-event.enum";
 import { EventEmitter } from "./libs/event-emitter";
 import { Canvas } from "./modules/canvas";
 import { Animate } from "./modules/animate";
 import { Snake } from "./models/snake";
+import { Berry } from "./models/berry";
+import { Tail } from "./models/tail";
 
 import { KeyCode } from "./constants/key-code.enum";
 
 import type { SnakeGameOptions } from "./interfaces/snake-game-options";
+import type { SnakeGameStatus } from "./interfaces/snake-game";
 
 export const DEFAULT_SNAKE_OPTIONS: SnakeGameOptions = {
-  startTails: 3,
-  sizeCell: 12,
+  startTails: 10,
+  sizeCell: 20,
 } as const;
 
 export class SnakeGame {
@@ -18,8 +23,11 @@ export class SnakeGame {
   private _canvas: Canvas;
   private _animate: Animate;
   private _score: number = 0;
+  private _speed: number = 8;
+  private _status: SnakeGameStatus = "stopped";
   private _eventEmitter: EventEmitter;
   private _snake: Snake | null = null;
+  private _berry: Berry;
 
   constructor(
     selector: HTMLCanvasElement | string,
@@ -28,6 +36,7 @@ export class SnakeGame {
     this._canvas = new Canvas(selector);
     this._animate = new Animate({ loop: true });
     this._eventEmitter = new EventEmitter();
+    this._berry = new Berry();
 
     this._options = { ...DEFAULT_SNAKE_OPTIONS, ...options };
   }
@@ -48,13 +57,30 @@ export class SnakeGame {
 
   public start(): void {
     const { startTails, sizeCell } = this._options;
-    this._snake = new Snake({ x: 0, y: 0, dx: 0, dy: sizeCell, startTails });
+    const { height: canvasHeight, width: canvasWidth } = this._canvas;
+    this._status = "playing";
     let count = 0;
 
+    this._snake = new Snake({
+      x: (canvasWidth / sizeCell / 2) * sizeCell,
+      y: (canvasHeight / sizeCell / 2) * sizeCell,
+      dx: 0,
+      dy: -sizeCell,
+      startTails,
+    });
+
+    this._score = 0;
+    this.updateBerry();
     document.addEventListener("keydown", this.initialControls);
 
-    this._animate.start((progress) => {
-      if (++count < 4) return void 0;
+    this._animate.start(() => {
+      if (this._status === "stopped") {
+        this.stop();
+
+        return void 0;
+      }
+
+      if (++count < this._speed) return void 0;
       count = 0;
 
       this.update();
@@ -65,6 +91,7 @@ export class SnakeGame {
   }
 
   public stop(): void {
+    this._status = "stopped";
     this._animate.stop();
 
     document.removeEventListener("keydown", this.initialControls);
@@ -72,6 +99,51 @@ export class SnakeGame {
   }
 
   private update(): void {
+    if (!this._snake) return void 0;
+
+    this.updateSnake();
+
+    if (this._berry.x === this._snake.x && this._berry.y === this._snake.y) {
+      const { tails } = this._snake;
+      const lastTail = tails.at(tails.length);
+
+      this._score += 10;
+      tails.push(new Tail({ x: lastTail?.x, y: lastTail?.y }));
+      this._eventEmitter.emit(SnakeGameEvent.UpdateScore, {
+        score: this._score,
+      });
+
+      this.updateBerry();
+    }
+  }
+
+  private draw(): void {
+    const { height: canvasHeight, width: canvasWidth, ctx } = this._canvas;
+
+    if (!this._snake) return void 0;
+
+    ctx.clearRect(0, 0, canvasWidth, canvasHeight);
+
+    this.drawBerry();
+    this.drawSnake();
+  }
+
+  private drawSnake(): void {
+    const { sizeCell } = this._options;
+    const { ctx } = this._canvas;
+
+    if (!this._snake) return void 0;
+
+    ctx.fillStyle = "#94c41a";
+    ctx.fillRect(this._snake.x, this._snake.y, sizeCell, sizeCell);
+
+    this._snake.tails.forEach((tail) => {
+      ctx.fillStyle = "#B9F621";
+      ctx.fillRect(tail.x, tail.y, sizeCell, sizeCell);
+    });
+  }
+
+  private updateSnake(): void {
     const { sizeCell } = this._options;
     const { height: canvasHeight, width: canvasWidth } = this._canvas;
 
@@ -99,26 +171,33 @@ export class SnakeGame {
 
     if (this._snake.y < 0) this._snake.y = canvasHeight - sizeCell;
     else if (this._snake.y >= canvasHeight) this._snake.y = 0;
+
+    for (let index = this._snake.tails.length - 1; index >= 3; index--) {
+      const tail = this._snake.tails[index];
+
+      if (tail.x === this._snake.x && tail.y === this._snake.y) {
+        this._status = "stopped";
+      }
+    }
   }
 
-  private draw(): void {
+  private drawBerry(): void {
     const { sizeCell } = this._options;
-    const { height: canvasHeight, width: canvasWidth, ctx } = this._canvas;
+    const { ctx } = this._canvas;
 
-    if (!this._snake) return void 0;
-
-    ctx.clearRect(0, 0, canvasWidth, canvasHeight);
-
-    ctx.fillStyle = "#FA0556";
-    ctx.fillRect(this._snake.x, this._snake.y, sizeCell, sizeCell);
-
-    this._snake.tails.forEach((tail, index) => {
-      ctx.fillStyle = "#A00034";
-      ctx.fillRect(tail.x, tail.y, sizeCell, sizeCell);
-    });
+    ctx.fillStyle = "#B6134A";
+    ctx.fillRect(this._berry.x, this._berry.y, sizeCell, sizeCell);
   }
 
-  private initialControls = (event: KeyboardEvent) => {
+  private updateBerry(): void {
+    const { sizeCell } = this._options;
+    const { height: canvasHeight, width: canvasWidth } = this._canvas;
+
+    this._berry.x = randomInt(0, canvasWidth / sizeCell) * sizeCell;
+    this._berry.y = randomInt(0, canvasHeight / sizeCell) * sizeCell;
+  }
+
+  private initialControls = (event: KeyboardEvent): void => {
     const { sizeCell } = this._options;
 
     if (!this._snake) return void 0;
