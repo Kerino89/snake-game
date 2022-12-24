@@ -35,4 +35,4 @@ async function main(): Promise<void> {
   btnStart.addEventListener("click", () => snakeGame.start());
 }
 
-main();
+document.addEventListener("DOMContentLoaded", main, { once: true });
