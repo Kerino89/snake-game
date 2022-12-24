@@ -1,18 +1,38 @@
 import { SnakeGame } from "./snake-game";
-import { SnakeGameEvent } from "./constants/snake-game-event.enum";
+import { SnakeGameEventType } from "./constants/snake-game-event.enum";
 
 async function main(): Promise<void> {
-  const elementScore = document.querySelector("#score span");
+  const [btnStart] =
+    document.querySelectorAll<HTMLButtonElement>("#controls button");
+  const elementScore = document.querySelector<HTMLSpanElement>("#score span");
   const snakeGame = new SnakeGame("#canvas-game");
 
   snakeGame.on(
-    [SnakeGameEvent.Start, SnakeGameEvent.UpdateScore],
-    (event: any) => {
-      if (elementScore?.textContent) elementScore.textContent = event.score;
+    [
+      SnakeGameEventType.Start,
+      SnakeGameEventType.Stop,
+      SnakeGameEventType.UpdateScore,
+    ],
+    ({ score, type }) => {
+      if (elementScore?.textContent) {
+        elementScore.textContent = score.toString();
+      }
+
+      if (!btnStart) return void 0;
+
+      switch (type) {
+        case SnakeGameEventType.Start:
+          btnStart.style.visibility = "hidden";
+          break;
+
+        case SnakeGameEventType.Stop:
+          btnStart.style.visibility = "visible";
+          break;
+      }
     }
   );
 
-  snakeGame.start();
+  btnStart.addEventListener("click", () => snakeGame.start());
 }
 
 main();

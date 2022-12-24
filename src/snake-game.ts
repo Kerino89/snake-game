@@ -1,6 +1,6 @@
 import { randomInt } from "./helpers/random-int";
 
-import { SnakeGameEvent } from "./constants/snake-game-event.enum";
+import { SnakeGameEventType } from "./constants/snake-game-event.enum";
 import { EventEmitter } from "./libs/event-emitter";
 import { Canvas } from "./modules/canvas";
 import { Animate } from "./modules/animate";
@@ -11,7 +11,7 @@ import { Tail } from "./models/tail";
 import { KeyCode } from "./constants/key-code.enum";
 
 import type { SnakeGameOptions } from "./interfaces/snake-game-options";
-import type { SnakeEvent, SnakeGameStatus } from "./interfaces/snake-game";
+import type { SnakeGameEvent, SnakeGameStatus } from "./interfaces/snake-game";
 
 export const DEFAULT_SNAKE_OPTIONS: SnakeGameOptions = {
   startTails: 10,
@@ -41,18 +41,25 @@ export class SnakeGame {
     this._options = { ...DEFAULT_SNAKE_OPTIONS, ...options };
   }
 
+  private getEvent(type: SnakeGameEventType): SnakeGameEvent {
+    return {
+      type,
+      score: this._score,
+    };
+  }
+
   public on(
     event: string | string[],
-    listener: (event?: SnakeEvent) => void
+    listener: (event: SnakeGameEvent) => void
   ): void {
-    this._eventEmitter.on<SnakeEvent>(event, listener);
+    this._eventEmitter.on(event, listener);
   }
 
   public off(
     event: string | string[],
-    listener: (event?: SnakeEvent) => void
+    listener: (event: SnakeGameEvent) => void
   ): void {
-    this._eventEmitter.off<SnakeEvent>(event, listener);
+    this._eventEmitter.off(event, listener);
   }
 
   public start(): void {
@@ -87,7 +94,10 @@ export class SnakeGame {
       this.draw();
     });
 
-    this._eventEmitter.emit(SnakeGameEvent.Start, { score: this._score });
+    this._eventEmitter.emit(
+      SnakeGameEventType.Start,
+      this.getEvent(SnakeGameEventType.Start)
+    );
   }
 
   public stop(): void {
@@ -95,7 +105,10 @@ export class SnakeGame {
     this._animate.stop();
 
     document.removeEventListener("keydown", this.initialControls);
-    this._eventEmitter.emit(SnakeGameEvent.Stop, { score: this._score });
+    this._eventEmitter.emit(
+      SnakeGameEventType.Stop,
+      this.getEvent(SnakeGameEventType.Stop)
+    );
   }
 
   private update(): void {
@@ -109,9 +122,10 @@ export class SnakeGame {
 
       this._score += 10;
       tails.push(new Tail({ x: lastTail?.x, y: lastTail?.y }));
-      this._eventEmitter.emit(SnakeGameEvent.UpdateScore, {
-        score: this._score,
-      });
+      this._eventEmitter.emit(
+        SnakeGameEventType.UpdateScore,
+        this.getEvent(SnakeGameEventType.UpdateScore)
+      );
 
       this.updateBerry();
     }

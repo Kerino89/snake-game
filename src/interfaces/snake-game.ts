@@ -1,2 +1,4 @@
+import { SnakeGameEventType } from "../constants/snake-game-event.enum";
+
 export type SnakeGameStatus = "stopped" | "playing";
-export type SnakeEvent = { score: number };
+export type SnakeGameEvent = { score: number; type: SnakeGameEventType };

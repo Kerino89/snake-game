@@ -3,10 +3,7 @@ import type { Events } from "./event-emitter.interface";
 export class EventEmitter {
   public constructor(protected events: Events = {}) {}
 
-  public on<C = unknown>(
-    event: string | string[],
-    listener: (context?: C) => void
-  ): void {
+  public on(event: string | string[], listener: (context?: any) => void): void {
     this.eventToArray(event).forEach((event) => {
       if (!this.has(event)) {
         this.events[event] = [];
@@ -18,10 +15,7 @@ export class EventEmitter {
     });
   }
 
-  public off<C = unknown>(
-    event: string | string[],
-    listener: (context?: C) => void
-  ) {
+  public off(event: string | string[], listener: (context?: any) => void) {
     this.eventToArray(event).forEach((event) => {
       if (!this.has(event)) return void 0;
 
@@ -37,7 +31,7 @@ export class EventEmitter {
     });
   }
 
-  public emit(event: string | string[], context?: unknown): void {
+  public emit(event: string | string[], context?: any): void {
     this.eventToArray(event).forEach((event) => {
       if (!this.has(event)) return void 0;
 
