@@ -3,9 +3,9 @@ import type { Events } from "./event-emitter.interface";
 export class EventEmitter {
   public constructor(protected events: Events = {}) {}
 
-  public on(
+  public on<C = unknown>(
     event: string | string[],
-    listener: (context?: unknown) => void
+    listener: (context?: C) => void
   ): void {
     this.eventToArray(event).forEach((event) => {
       if (!this.has(event)) {
@@ -18,7 +18,10 @@ export class EventEmitter {
     });
   }
 
-  public off(event: string | string[], listener: (context?: unknown) => void) {
+  public off<C = unknown>(
+    event: string | string[],
+    listener: (context?: C) => void
+  ) {
     this.eventToArray(event).forEach((event) => {
       if (!this.has(event)) return void 0;
 

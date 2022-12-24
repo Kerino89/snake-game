@@ -11,7 +11,7 @@ import { Tail } from "./models/tail";
 import { KeyCode } from "./constants/key-code.enum";
 
 import type { SnakeGameOptions } from "./interfaces/snake-game-options";
-import type { SnakeGameStatus } from "./interfaces/snake-game";
+import type { SnakeEvent, SnakeGameStatus } from "./interfaces/snake-game";
 
 export const DEFAULT_SNAKE_OPTIONS: SnakeGameOptions = {
   startTails: 10,
@@ -43,16 +43,16 @@ export class SnakeGame {
 
   public on(
     event: string | string[],
-    listener: (context?: unknown) => void
+    listener: (event?: SnakeEvent) => void
   ): void {
-    this._eventEmitter.on(event, listener);
+    this._eventEmitter.on<SnakeEvent>(event, listener);
   }
 
   public off(
     event: string | string[],
-    listener: (context?: unknown) => void
+    listener: (event?: SnakeEvent) => void
   ): void {
-    this._eventEmitter.off(event, listener);
+    this._eventEmitter.off<SnakeEvent>(event, listener);
   }
 
   public start(): void {
